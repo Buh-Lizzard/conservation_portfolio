@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conservation Data Science Portfolio</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --forest: #1a2e1a;
+    --moss: #2d4a2d;
+    --fern: #4a7c4a;
+    --sage: #7aaa6a;
+    --mist: #b8d4a8;
+    --cream: #f4f0e8;
+    --bark: #8b6b47;
+    --earth: #4a3728;
+    --water: #2a5f6e;
+    --sky: #5b9bb5;
+    --amber: #c8861a;
+    --rust: #a84a2a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--forest);
+    color: var(--cream);
+    font-family: 'IBM Plex Sans', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  header {
+    position: relative;
+    padding: 80px 60px 60px;
+    border-bottom: 1px solid rgba(122, 170, 106, 0.2);
+    overflow: hidden;
+  }
+
+  header::after {
+    content: 'CONSERVATION × DATA';
+    position: absolute;
+    top: 20px;
+    right: -40px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: rgba(122,170,106,0.2);
+    transform: rotate(90deg);
+    transform-origin: right center;
+    white-space: nowrap;
+  }
+
+  .header-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--sage);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 5vw, 72px);
+    font-weight: 900;
+    line-height: 1.0;
+    color: var(--cream);
+    margin-bottom: 8px;
+  }
+
+  h1 em {
+    color: var(--sage);
+    font-style: italic;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--mist);
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    margin-top: 16px;
+    max-width: 600px;
+    line-height: 1.6;
+  }
+
+  /* Stack legend */
+  .stack-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 32px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: rgba(244, 240, 232, 0.6);
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  /* Main grid */
+  main {
+    padding: 60px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 2px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .project-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(122, 170, 106, 0.1);
+    padding: 36px;
+    position: relative;
+    transition: background 0.3s, border-color 0.3s;
+    cursor: default;
+  }
+
+  .project-card:hover {
+    background: rgba(122, 170, 106, 0.05);
+    border-color: rgba(122, 170, 106, 0.3);
+  }
+
+  .project-card:hover .card-number {
+    color: var(--sage);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .card-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 900;
+    color: rgba(122,170,106,0.15);
+    line-height: 1;
+    transition: color 0.3s;
+    flex-shrink: 0;
+    width: 52px;
+  }
+
+  .card-title-block {
+    flex: 1;
+  }
+
+  .card-category {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--cream);
+    line-height: 1.3;
+  }
+
+  .card-description {
+    font-size: 13px;
+    color: rgba(244,240,232,0.65);
+    line-height: 1.7;
+    margin-bottom: 20px;
+    font-weight: 300;
+  }
+
+  /* Key signals */
+  .signals-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--sage);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .signals-list {
+    list-style: none;
+    margin-bottom: 20px;
+  }
+
+  .signals-list li {
+    font-size: 12px;
+    color: rgba(244,240,232,0.75);
+    padding: 3px 0;
+    padding-left: 14px;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .signals-list li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--sage);
+    font-size: 10px;
+  }
+
+  /* Tech stack tags */
+  .stack-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(122,170,106,0.1);
+  }
+
+  .tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  .tag-python { background: rgba(74,124,74,0.25); color: var(--sage); border: 1px solid rgba(74,124,74,0.3); }
+  .tag-mlops  { background: rgba(42,95,110,0.3);  color: var(--sky); border: 1px solid rgba(42,95,110,0.4); }
+  .tag-geo    { background: rgba(139,107,71,0.25); color: #c8a87a; border: 1px solid rgba(139,107,71,0.3); }
+  .tag-cloud  { background: rgba(200,134,26,0.2);  color: var(--amber); border: 1px solid rgba(200,134,26,0.3); }
+  .tag-dl     { background: rgba(168,74,42,0.2);   color: #e8a090; border: 1px solid rgba(168,74,42,0.3); }
+  .tag-viz    { background: rgba(90,60,110,0.3);   color: #b090d8; border: 1px solid rgba(90,60,110,0.4); }
+
+  .difficulty-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 2px;
+    background: linear-gradient(to right, var(--fern), var(--sage));
+    transition: width 0.5s;
+  }
+
+  /* Footer */
+  footer {
+    padding: 40px 60px;
+    border-top: 1px solid rgba(122,170,106,0.15);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer-section h4 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--sage);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .footer-section p, .footer-section li {
+    font-size: 12px;
+    color: rgba(244,240,232,0.6);
+    line-height: 1.8;
+  }
+
+  .footer-section ul { list-style: none; }
+  .footer-section li::before { content: '– '; color: var(--fern); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-tag">Principal Data Scientist · Project Portfolio</div>
+  <h1>Liz's<br><em>Data Science</em><br>Projects</h1>
+  <p class="subtitle">An end-to-end portfolio demonstrating production-grade ML, geospatial analysis, MLOps inspired by my work as a Master Naturalist and Virginia Leave No Trace State Advocate.</p>
+
+  <div class="stack-legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#4a7c4a"></div>Python / Core DS</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#2a5f6e"></div>MLOps / Deployment</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#8b6b47"></div>Geospatial / Remote Sensing</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#c8861a"></div>Cloud / Distributed</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#a84a2a"></div>Deep Learning</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#5a3c6e"></div>Visualization / Dashboards</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- 01 -->
+  <div class="project-card">
+    <div class="difficulty-bar" style="width:60%"></div>
+    <div class="card-header">
+      <div class="card-number">01</div>
+      <div class="card-title-block">
+        <div class="card-category" style="color: #c8a87a">Geospatial · Time Series</div>
+        <h3>Forest Cover Loss Forecasting with Satellite Time Series</h3>
+      </div>
+    </div>
+    <p class="card-description">Build a pixel-level deforestation risk model using multi-year Landsat/Sentinel-2 NDVI time series. Deploy as a monthly automated scoring pipeline with drift monitoring and an interactive risk map.</p>
+    <div class="signals-label">Principal-level signals</div>
+    <ul class="signals-list">
+      <li>Spatial cross-validation (not random splits) to avoid data leakage</li>
+      <li>MLflow for experiment tracking; DVC for data versioning</li>
+      <li>FastAPI endpoint + Streamlit risk dashboard</li>
+      <li>Model card with uncertainty quantification</li>
+    </ul>
+    <div class="stack-tags">
+      <span class="tag tag-python">Python</span>
+      <span class="tag tag-geo">Google Earth Engine</span>
+      <span class="tag tag-geo">GeoPandas</span>
+      <span class="tag tag-python">scikit-learn</span>
+      <span class="tag tag-mlops">MLflow</span>
+      <span class="tag tag-mlops">DVC</span>
+      <span class="tag tag-cloud">GCS</span>
+      <span class="tag tag-viz">Folium</span>
+    </div>
+  </div>
+
+  <!-- 02 -->
+  <div class="project-card">
+    <div class="difficulty-bar" style="width:85%"></div>
+    <div class="card-header">
+      <div class="card-number">02</div>
+      <div class="card-title-block">
+        <div class="card-category" style="color: #e8a090">Deep Learning · CV</div>
+        <h3>Wildlife Species ID from Camera Trap Images at Scale</h3>
+      </div>
+    </div>
+    <p class="card-description">Fine-tune a vision transformer on a publicly available camera trap dataset (iWildCam / LILA BC). Build a full inference pipeline with confidence thresholds, human-in-the-loop escalation, and a species abundance dashboard.</p>
+    <div class="signals-label">Principal-level signals</div>
+    <ul class="signals-list">
+      <li>Class imbalance strategy (focal loss, resampling) documented</li>
+      <li>Grad-CAM explainability visualizations</li>
+      <li>Dockerized inference service with latency benchmarks</li>
+      <li>Confusion matrix analysis by habitat type</li>
+    </ul>
+    <div class="stack-tags">
+      <span class="tag tag-python">Python</span>
+      <span class="tag tag-dl">PyTorch</span>
+      <span class="tag tag-dl">timm / ViT</span>
+      <span class="tag tag-mlops">Docker</span>
+      <span class="tag tag-mlops">FastAPI</span>
+      <span class="tag tag-cloud">AWS S3</span>
+      <span class="tag tag-viz">Streamlit</span>
+    </div>
+  </div>
+
+  <!-- 03 -->
+  <div class="project-card">
+    <div class="difficulty-bar" style="width:75%"></div>
+    <div class="card-header">
+      <div class="card-number">03</div>
+      <div class="card-title-block">
+        <div class="card-category" style="color: var(--sky)">MLOps · Causal Inference</div>
+        <h3>Carbon Sequestration Estimation with Causal ML</h3>
+      </div>
+    </div>
+    <p class="card-description">Use causal inference (DiD, synthetic control) to estimate the true additionality of reforestation projects — a critical question for carbon credit markets. Compare against naive regression baselines and show the bias correction.</p>
+    <div class="signals-label">Principal-level signals</div>
+    <ul class="signals-list">
+      <li>DoWhy / EconML for causal graph + estimand documentation</li>
+      <li>Sensitivity analysis (Rosenbaum bounds)</li>
+      <li>Policy memo format README for non-technical audience</li>
+      <li>Reproducible with Makefile + pinned environments</li>
+    </ul>
+    <div class="stack-tags">
+      <span class="tag tag-python">Python</span>
+      <span class="tag tag-python">DoWhy</span>
+      <span class="tag tag-python">EconML</span>
+      <span class="tag tag-geo">GeoPandas</span>
+      <span class="tag tag-mlops">DVC</span>
+      <span class="tag tag-viz">Altair</span>
+    </div>
+  </div>
+
+  <!-- 04 -->
+  <div class="project-card">
+    <div class="difficulty-bar" style="width:70%"></div>
+    <div class="card-header">
+      <div class="card-number">04</div>
+      <div class="card-title-block">
+        <div class="card-category" style="color: #c8a87a">NLP · Geospatial</div>
+        <h3>Illegal Mining & Logging Detection via NLP + Remote Sensing Fusion</h3>
+      </div>
+    </div>
+    <p class="card-description">Combine satellite change-detection alerts (Global Forest Watch API) with news scraping and NLP event extraction to build a fused early-warning system for illegal environmental activity.</p>
+    <div class="signals-label">Principal-level signals</div>
+    <ul class="signals-list">
+      <li>Multi-modal fusion architecture documented with design decisions</li>
+      <li>Named entity recognition with spaCy + custom environmental ontology</li>
+      <li>Alert de-duplication and precision/recall trade-off analysis</li>
+      <li>Scheduled pipeline with Prefect or Airflow</li>
+    </ul>
+    <div class="stack-tags">
+      <span class="tag tag-python">Python</span>
+      <span class="tag tag-dl">spaCy / HuggingFace</span>
+      <span class="tag tag-geo">GDAL</span>
+      <span class="tag tag-geo">Rasterio</span>
+      <span class="tag tag-mlops">Prefect</span>
+      <span class="tag tag-cloud">PostgreSQL / PostGIS</span>
+    </div>
+  </div>
+
+  <!-- 05 -->
+  <div class="project-card">
+    <div class="difficulty-bar" style="width:65%"></div>
+    <div class="card-header">
+      <div class="card-number">05</div>
+      <div class="card-title-block">
+        <div class="card-category" style="color: var(--sky)">Time Series · Forecasting</div>
+        <h3>Air Quality Forecasting & Health Impact Modeling</h3>
+      </div>
+    </div>
+    <p class="card-description">Forecast 72-hour PM2.5 concentrations across a sensor network using temporal fusion transformers, then estimate attributable health outcomes with an epidemiological model layer. Use EPA AQS open data.</p>
+    <div class="signals-label">Principal-level signals</div>
+    <ul class="signals-list">
+      <li>Temporal Fusion Transformer vs Prophet vs ARIMA ablation</li>
+      <li>Uncertainty bands (conformal prediction) on all forecasts</li>
+      <li>Health outcome linkage using published concentration–response functions</li>
+      <li>Live demo via Streamlit + weather API integration</li>
+    </ul>
+    <div class="stack-tags">
+      <span class="tag tag-python">Python</span>
+      <span class="tag tag-dl">PyTorch Forecasting</span>
+      <span class="tag tag-python">Prophet</span>
+      <span class="tag tag-mlops">MLflow</span>
+      <span class="tag tag-viz">Plotly</span>
+      <span class="tag tag-viz">Streamlit</span>
+    </div>
+  </div>
+
+  <!-- 06 -->
+  <div class="project-card">
+    <div class="difficulty-bar" style="width:80%"></div>
+    <div class="card-header">
+      <div class="card-number">06</div>
+      <div class="card-title-block">
+        <div class="card-category" style="color: #e8a090">Deep Learning · Audio</div>
+        <h3>Bioacoustic Species Monitoring from Passive Audio Sensors</h3>
+      </div>
+    </div>
+    <p class="card-description">Train a CNN on mel-spectrograms from the BirdCLEF / Rainforest Connection dataset to detect endangered species calls in continuous audio recordings. Build an automated nightly scoring pipeline for field deployment.</p>
+    <div class="signals-label">Principal-level signals</div>
+    <ul class="signals-list">
+      <li>Mixup + SpecAugment data augmentation strategy</li>
+      <li>Edge-deployable model (ONNX export + quantization)</li>
+      <li>Real-time spectrogram visualization dashboard</li>
+      <li>Precision-recall at operating thresholds for ranger use</li>
+    </ul>
+    <div class="stack-tags">
+      <span class="tag tag-python">Python</span>
+      <span class="tag tag-dl">PyTorch</span>
+      <span class="tag tag-dl">Librosa</span>
+      <span class="tag tag-mlops">ONNX</span>
+      <span class="tag tag-mlops">Docker</span>
+      <span class="tag tag-viz">Streamlit</span>
+    </div>
+  </div>
+
+  <!-- 07 -->
+  <div class="project-card">
+    <div class="difficulty-bar" style="width:75%"></div>
+    <div class="card-header">
+      <div class="card-number">07</div>
+      <div class="card-title-block">
+        <div class="card-category" style="color: var(--sky)">MLOps · Production</div>
+        <h3>Production ML Platform for Species Distribution Modeling</h3>
+      </div>
+    </div>
+    <p class="card-description">Build a fully productionized SDM (Species Distribution Model) service: feature store, model registry, A/B testing framework, and data drift detection — the kind of infra a principal would architect for a team.</p>
+    <div class="signals-label">Principal-level signals</div>
+    <ul class="signals-list">
+      <li>Feature store with Feast; model registry with MLflow</li>
+      <li>CI/CD pipeline with GitHub Actions + automated retraining triggers</li>
+      <li>Data drift detection with Evidently AI</li>
+      <li>Architecture Decision Record (ADR) docs in repo</li>
+    </ul>
+    <div class="stack-tags">
+      <span class="tag tag-python">Python</span>
+      <span class="tag tag-mlops">MLflow</span>
+      <span class="tag tag-mlops">Feast</span>
+      <span class="tag tag-mlops">Evidently AI</span>
+      <span class="tag tag-mlops">GitHub Actions</span>
+      <span class="tag tag-cloud">AWS / GCP</span>
+      <span class="tag tag-mlops">Docker</span>
+    </div>
+  </div>
+
+  <!-- 08 -->
+  <div class="project-card">
+    <div class="difficulty-bar" style="width:70%"></div>
+    <div class="card-header">
+      <div class="card-number">08</div>
+      <div class="card-title-block">
+        <div class="card-category" style="color: #c8a87a">Geospatial · LLM</div>
+        <h3>Environmental Regulation RAG Assistant</h3>
+      </div>
+    </div>
+    <p class="card-description">Build a retrieval-augmented generation (RAG) system over EPA regulations, IUCN species assessments, and conservation policy documents. Answer complex regulatory queries with source attribution and confidence scoring.</p>
+    <div class="signals-label">Principal-level signals</div>
+    <ul class="signals-list">
+      <li>Chunking strategy comparison (semantic vs fixed) with eval benchmarks</li>
+      <li>Hallucination detection with groundedness scoring</li>
+      <li>Citation tracing — every answer links to source paragraphs</li>
+      <li>Ragas evaluation framework for RAG quality</li>
+    </ul>
+    <div class="stack-tags">
+      <span class="tag tag-python">Python</span>
+      <span class="tag tag-dl">LangChain / LlamaIndex</span>
+      <span class="tag tag-dl">OpenAI / Claude API</span>
+      <span class="tag tag-python">ChromaDB</span>
+      <span class="tag tag-python">Ragas</span>
+      <span class="tag tag-viz">Streamlit</span>
+    </div>
+  </div>
+
+  <!-- 09 -->
+  <div class="project-card">
+    <div class="difficulty-bar" style="width:65%"></div>
+    <div class="card-header">
+      <div class="card-number">09</div>
+      <div class="card-title-block">
+        <div class="card-category" style="color: var(--sage)">Bayesian · Statistics</div>
+        <h3>Bayesian Population Viability Analysis for Endangered Species</h3>
+      </div>
+    </div>
+    <p class="card-description">Implement a Bayesian state-space model for estimating extinction risk and population trends from noisy field survey data. Show how uncertainty propagates into conservation decision recommendations.</p>
+    <div class="signals-label">Principal-level signals</div>
+    <ul class="signals-list">
+      <li>PyMC hierarchical model with MCMC diagnostics (R-hat, trace plots)</li>
+      <li>Posterior predictive checks and sensitivity analysis</li>
+      <li>Decision-theoretic framing: when does uncertainty change the action?</li>
+      <li>Reproducible with Quarto report output</li>
+    </ul>
+    <div class="stack-tags">
+      <span class="tag tag-python">Python</span>
+      <span class="tag tag-python">PyMC</span>
+      <span class="tag tag-python">ArviZ</span>
+      <span class="tag tag-python">NumPy / SciPy</span>
+      <span class="tag tag-viz">Matplotlib</span>
+      <span class="tag tag-viz">Quarto</span>
+    </div>
+  </div>
+
+  <!-- 10 -->
+  <div class="project-card">
+    <div class="difficulty-bar" style="width:80%"></div>
+    <div class="card-header">
+      <div class="card-number">10</div>
+      <div class="card-title-block">
+        <div class="card-category" style="color: var(--amber)">Distributed · Big Data</div>
+        <h3>Ocean Health Index — Distributed Satellite Analytics Pipeline</h3>
+      </div>
+    </div>
+    <p class="card-description">Process multi-year SST, chlorophyll, and ocean color data from MODIS/VIIRS using Dask or Spark to compute regional ocean health indices at scale. Demonstrate distributed compute proficiency on real scientific datasets.</p>
+    <div class="signals-label">Principal-level signals</div>
+    <ul class="signals-list">
+      <li>Dask/Xarray pipeline with chunking optimization benchmarks</li>
+      <li>Zarr cloud-native storage format with lazy loading</li>
+      <li>Trend decomposition (STL) + anomaly detection on time series</li>
+      <li>Interactive Jupyter Book as final deliverable</li>
+    </ul>
+    <div class="stack-tags">
+      <span class="tag tag-python">Python</span>
+      <span class="tag tag-cloud">Dask</span>
+      <span class="tag tag-geo">Xarray</span>
+      <span class="tag tag-geo">Zarr</span>
+      <span class="tag tag-geo">Rasterio</span>
+      <span class="tag tag-cloud">AWS S3</span>
+      <span class="tag tag-viz">HoloViews</span>
+    </div>
+  </div>
+
+  <!-- 11 -->
+  <div class="project-card">
+    <div class="difficulty-bar" style="width:60%"></div>
+    <div class="card-header">
+      <div class="card-number">11</div>
+      <div class="card-title-block">
+        <div class="card-category" style="color: #b090d8">Dashboard · Storytelling</div>
+        <h3>Climate Equity Dashboard — Environmental Justice Analysis</h3>
+      </div>
+    </div>
+    <p class="card-description">Intersect EPA environmental burden layers (EJScreen) with demographic and health outcome data to map disproportionate pollution exposure. Build a publication-quality interactive dashboard for policy advocacy.</p>
+    <div class="signals-label">Principal-level signals</div>
+    <ul class="signals-list">
+      <li>Spatial regression controlling for confounders (spatial lag model)</li>
+      <li>SHAP-based explanations of which factors drive exposure scores</li>
+      <li>Accessible, colorblind-safe design with WCAG compliance</li>
+      <li>Deployed public URL (Streamlit Cloud or HuggingFace Spaces)</li>
+    </ul>
+    <div class="stack-tags">
+      <span class="tag tag-python">Python</span>
+      <span class="tag tag-python">PySAL</span>
+      <span class="tag tag-geo">GeoPandas</span>
+      <span class="tag tag-python">SHAP</span>
+      <span class="tag tag-viz">Plotly Dash</span>
+      <span class="tag tag-cloud">HF Spaces</span>
+    </div>
+  </div>
+
+  <!-- 12 -->
+  <div class="project-card">
+    <div class="difficulty-bar" style="width:90%"></div>
+    <div class="card-header">
+      <div class="card-number">12</div>
+      <div class="card-title-block">
+        <div class="card-category" style="color: var(--sky)">LLM Agent · Full Stack</div>
+        <h3>Autonomous Conservation Research Agent</h3>
+      </div>
+    </div>
+    <p class="card-description">Build an LLM agent that autonomously searches GBIF species data, NASA Earthdata, and scientific literature to generate structured conservation status reports. The capstone that ties every skill together.</p>
+    <div class="signals-label">Principal-level signals</div>
+    <ul class="signals-list">
+      <li>Tool-using agent with LangGraph or CrewAI orchestration</li>
+      <li>Structured output validation with Pydantic schemas</li>
+      <li>Evaluation harness: accuracy of factual claims, citation quality</li>
+      <li>Cost tracking and token optimization documentation</li>
+    </ul>
+    <div class="stack-tags">
+      <span class="tag tag-dl">LangGraph / CrewAI</span>
+      <span class="tag tag-dl">Claude / GPT-4o API</span>
+      <span class="tag tag-python">Pydantic</span>
+      <span class="tag tag-geo">GBIF API</span>
+      <span class="tag tag-mlops">FastAPI</span>
+      <span class="tag tag-viz">Streamlit</span>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-section">
+    <h4>Cross-cutting must-haves</h4>
+    <ul>
+      <li>pytest test suite in every repo</li>
+      <li>pre-commit hooks (Black + Ruff)</li>
+      <li>Structured README with problem → approach → results</li>
+      <li>requirements.txt or pyproject.toml</li>
+      <li>At least 3 repos with a live deployed demo</li>
+    </ul>
+  </div>
+  <div class="footer-section">
+    <h4>Open data sources</h4>
+    <ul>
+      <li>NASA Earthdata / Google Earth Engine</li>
+      <li>GBIF — 2B+ species occurrence records</li>
+      <li>EPA AQS, EJScreen, FRS</li>
+      <li>LILA BC camera trap datasets</li>
+      <li>BirdCLEF (Kaggle / Xeno-canto)</li>
+      <li>Global Forest Watch API</li>
+    </ul>
+  </div>
+  <div class="footer-section">
+    <h4>Suggested build order</h4>
+    <p style="margin-bottom:8px">Start with high signal-to-effort ratio:</p>
+    <ul>
+      <li>01 → 05 → 09 (varied methods)</li>
+      <li>Then 02 or 06 (deep learning)</li>
+      <li>07 as your MLOps showcase</li>
+      <li>12 as your capstone finale</li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>
